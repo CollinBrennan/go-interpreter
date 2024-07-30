@@ -121,3 +121,45 @@ type IntegerLiteral struct {
 func (integerLiteral IntegerLiteral) expressionNode()      {}
 func (integerLiteral IntegerLiteral) TokenLiteral() string { return integerLiteral.Token.Literal }
 func (integerLiteral IntegerLiteral) String() string       { return integerLiteral.Token.Literal }
+
+// prefix expression
+type PrefixExpression struct {
+	Token    token.Token
+	Operator string
+	Operand  Expression
+}
+
+func (prefixExpression PrefixExpression) expressionNode()      {}
+func (prefixExpression PrefixExpression) TokenLiteral() string { return prefixExpression.Token.Literal }
+func (prefixExpression PrefixExpression) String() string {
+	var buffer bytes.Buffer
+
+	buffer.WriteString("(")
+	buffer.WriteString(prefixExpression.Operator)
+	buffer.WriteString(prefixExpression.Operand.String())
+	buffer.WriteString(")")
+
+	return buffer.String()
+}
+
+// infix expression
+type InfixExpression struct {
+	Token        token.Token
+	Operator     string
+	LeftOperand  Expression
+	RightOperand Expression
+}
+
+func (infixExpression InfixExpression) expressionNode()      {}
+func (infixExpression InfixExpression) TokenLiteral() string { return infixExpression.Token.Literal }
+func (infixExpression InfixExpression) String() string {
+	var buffer bytes.Buffer
+
+	buffer.WriteString("(")
+	buffer.WriteString(infixExpression.LeftOperand.String())
+	buffer.WriteString(" " + infixExpression.Operator + " ")
+	buffer.WriteString(infixExpression.RightOperand.String())
+	buffer.WriteString(")")
+
+	return buffer.String()
+}
