@@ -20,6 +20,7 @@ type Expression interface {
 	expressionNode()
 }
 
+// program (root node)
 type Program struct {
 	Statements []Statement
 }
@@ -160,6 +161,60 @@ func (infixExpression InfixExpression) String() string {
 	buffer.WriteString(" " + infixExpression.Operator + " ")
 	buffer.WriteString(infixExpression.RightOperand.String())
 	buffer.WriteString(")")
+
+	return buffer.String()
+}
+
+// Boolean
+type Boolean struct {
+	Token token.Token
+	Value bool
+}
+
+func (boolean *Boolean) expressionNode()      {}
+func (boolean *Boolean) TokenLiteral() string { return boolean.Token.Literal }
+func (boolean *Boolean) String() string       { return boolean.Token.Literal }
+
+// If
+type IfExpression struct {
+	Token       token.Token
+	Condition   Expression
+	Consequence *BlockStatement
+	Alternative *BlockStatement
+}
+
+func (ie *IfExpression) expressionNode()      {}
+func (ie *IfExpression) TokenLiteral() string { return ie.Token.Literal }
+func (ie *IfExpression) String() string {
+	var buffer bytes.Buffer
+
+	buffer.WriteString("if")
+	buffer.WriteString(ie.Condition.String())
+	buffer.WriteString(" ")
+	buffer.WriteString(ie.Consequence.String())
+
+	if ie.Alternative != nil {
+		buffer.WriteString("else ")
+		buffer.WriteString(ie.Alternative.String())
+	}
+
+	return buffer.String()
+}
+
+// Block statement
+type BlockStatement struct {
+	Token      token.Token
+	Statements []Statement
+}
+
+func (bs *BlockStatement) statementNode()       {}
+func (bs *BlockStatement) TokenLiteral() string { return bs.Token.Literal }
+func (bs *BlockStatement) String() string {
+	var buffer bytes.Buffer
+
+	for _, statement := range bs.Statements {
+		buffer.WriteString(statement.String())
+	}
 
 	return buffer.String()
 }
