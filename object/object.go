@@ -22,6 +22,7 @@ const (
 	RETURN_VALUE_OBJ = "RETURN VALUE"
 	ERROR_OBJ        = "ERROR"
 	FUNCTION_OBJ     = "FUNCTION"
+	BUILTIN_OBJ      = "BUILTIN"
 )
 
 // null
@@ -95,3 +96,13 @@ func (f *Function) Inspect() string {
 
 	return buffer.String()
 }
+
+// builtin function
+type BuiltInFunction func(args ...Object) Object
+
+type BuiltIn struct {
+	Fn BuiltInFunction
+}
+
+func (bi *BuiltIn) Type() ObjectType { return BUILTIN_OBJ }
+func (bi *BuiltIn) Inspect() string  { return "builtin function" }
