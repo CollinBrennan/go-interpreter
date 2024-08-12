@@ -271,7 +271,7 @@ func (ce *CallExpression) String() string {
 	return buffer.String()
 }
 
-// string
+// String
 type StringLiteral struct {
 	Token token.Token
 	Value string
@@ -280,3 +280,26 @@ type StringLiteral struct {
 func (sl *StringLiteral) expressionNode()      {}
 func (sl *StringLiteral) TokenLiteral() string { return sl.Token.Literal }
 func (sl *StringLiteral) String() string       { return sl.Token.Literal }
+
+// Array
+type ArrayLiteral struct {
+	Token    token.Token
+	Elements []Expression
+}
+
+func (al *ArrayLiteral) expressionNode()      {}
+func (al *ArrayLiteral) TokenLiteral() string { return al.Token.Literal }
+func (al *ArrayLiteral) String() string {
+	var buffer bytes.Buffer
+
+	elements := []string{}
+	for _, el := range al.Elements {
+		elements = append(elements, el.String())
+	}
+
+	buffer.WriteString("[")
+	buffer.WriteString(strings.Join(elements, ", "))
+	buffer.WriteString("]")
+
+	return buffer.String()
+}

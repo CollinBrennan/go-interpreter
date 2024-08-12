@@ -64,6 +64,7 @@ func New(lex *lexer.Lexer) *Parser {
 	parser.registerPrefix(token.FUNCTION, parser.parseFunctionLiteral)
 	parser.registerPrefix(token.TRUE, parser.parseBoolean)
 	parser.registerPrefix(token.FALSE, parser.parseBoolean)
+	parser.registerPrefix(token.LBRACKET, parser.parseArrayLiteral)
 
 	parser.infixParseFunctions = make(map[token.TokenType]infixParseFunction)
 	parser.registerInfix(token.PLUS, parser.parseInfixExpression)
@@ -215,32 +216,8 @@ func (parser *Parser) parseInfixExpression(leftOperand ast.Expression) ast.Expre
 
 func (parser *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 	expression := &ast.CallExpression{Token: parser.currentToken, Function: function}
-	expression.Arguments = parser.parseCallArguments()
+	expression.Arguments = parser.parseExpressionList(token.RPAREN)
 	return expression
-}
-
-func (parser *Parser) parseCallArguments() []ast.Expression {
-	args := []ast.Expression{}
-
-	if parser.peekTokenIs(token.RPAREN) {
-		parser.nextToken()
-		return args
-	}
-
-	parser.nextToken()
-	args = append(args, parser.parseExpression(LOWEST))
-
-	for parser.peekTokenIs(token.COMMA) {
-		parser.nextToken()
-		parser.nextToken()
-		args = append(args, parser.parseExpression(LOWEST))
-	}
-
-	if !parser.expectPeek(token.RPAREN) {
-		return nil
-	}
-
-	return args
 }
 
 func (parser *Parser) parseGroupedExpression() ast.Expression {
@@ -345,6 +322,37 @@ func (parser *Parser) parseFunctionLiteral() ast.Expression {
 	expression.Body = parser.parseBlockStatement()
 
 	return expression
+}
+
+func (parser *Parser) parseArrayLiteral() ast.Expression {
+	return &ast.ArrayLiteral{
+		Token:    parser.currentToken,
+		Elements: parser.parseExpressionList(token.RBRACKET),
+	}
+}
+
+func (parser *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
+	expressions := []ast.Expression{}
+
+	if parser.peekTokenIs(end) {
+		parser.nextToken()
+		return expressions
+	}
+
+	parser.nextToken()
+	expressions = append(expressions, parser.parseExpression(LOWEST))
+
+	for parser.peekTokenIs(token.COMMA) {
+		parser.nextToken()
+		parser.nextToken()
+		expressions = append(expressions, parser.parseExpression(LOWEST))
+	}
+
+	if !parser.expectPeek(end) {
+		return nil
+	}
+
+	return expressions
 }
 
 func (parser *Parser) parseFunctionParameters() []*ast.Identifier {
