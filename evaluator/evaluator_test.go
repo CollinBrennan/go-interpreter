@@ -395,6 +395,26 @@ func TestArrayIndexExpressions(t *testing.T) {
 	}
 }
 
+func TestArrayConcatenation(t *testing.T) {
+	input := "[1, 2] <> [3, 4]"
+
+	evaluated := testEval(input)
+	result, ok := evaluated.(*object.Array)
+	if !ok {
+		t.Fatalf("object is not Array. got=%T (%+v)", evaluated, evaluated)
+	}
+
+	if len(result.Elements) != 4 {
+		t.Fatalf("array has wrong num of elements. got=%d",
+			len(result.Elements))
+	}
+
+	testIntegerObject(t, result.Elements[0], 1)
+	testIntegerObject(t, result.Elements[1], 2)
+	testIntegerObject(t, result.Elements[2], 3)
+	testIntegerObject(t, result.Elements[3], 4)
+}
+
 func testNullObject(t *testing.T, obj object.Object) bool {
 	if obj != NULL {
 		t.Errorf("Expected NULL object. Got %T (%+v) instead.", obj, obj)
