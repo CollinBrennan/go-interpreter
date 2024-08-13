@@ -281,7 +281,7 @@ func (sl *StringLiteral) expressionNode()      {}
 func (sl *StringLiteral) TokenLiteral() string { return sl.Token.Literal }
 func (sl *StringLiteral) String() string       { return sl.Token.Literal }
 
-// Array
+// Array literal
 type ArrayLiteral struct {
 	Token    token.Token
 	Elements []Expression
@@ -300,6 +300,27 @@ func (al *ArrayLiteral) String() string {
 	buffer.WriteString("[")
 	buffer.WriteString(strings.Join(elements, ", "))
 	buffer.WriteString("]")
+
+	return buffer.String()
+}
+
+// Index expression
+type IndexExpression struct {
+	Token      token.Token
+	Collection Expression
+	Index      Expression
+}
+
+func (ie *IndexExpression) expressionNode()      {}
+func (ie *IndexExpression) TokenLiteral() string { return ie.Token.Literal }
+func (ie *IndexExpression) String() string {
+	var buffer bytes.Buffer
+
+	buffer.WriteString("(")
+	buffer.WriteString(ie.Collection.String())
+	buffer.WriteString("[")
+	buffer.WriteString(ie.Index.String())
+	buffer.WriteString("])")
 
 	return buffer.String()
 }

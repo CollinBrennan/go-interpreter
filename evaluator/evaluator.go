@@ -79,6 +79,22 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return &object.String{Value: node.Value}
 	case *ast.Boolean:
 		return nativeBoolToBooleanObject(node.Value)
+	case *ast.ArrayLiteral:
+		elements := evalExpressions(node.Elements, env)
+		if len(elements) == 1 && isError(elements[0]) {
+			return elements[0]
+		}
+		return &object.Array{Elements: elements}
+	case *ast.IndexExpression:
+		collection := Eval(node.Collection, env)
+		if isError(collection) {
+			return collection
+		}
+		index := Eval(node.Index, env)
+		if isError(index) {
+			return index
+		}
+		return evalIndexExpression(collection, index)
 	}
 
 	return nil
@@ -289,6 +305,27 @@ func evalStringInfixExpression(operator string, left, right object.Object) objec
 	rightVal := right.(*object.String).Value
 
 	return &object.String{Value: leftVal + rightVal}
+}
+
+func evalIndexExpression(collection, index object.Object) object.Object {
+	switch {
+	case collection.Type() == object.ARRAY_OBJ && index.Type() == object.INTEGER_OBJ:
+		return evalArrayIndexExpression(collection, index)
+	default:
+		return newError("index operator not supported %s", collection.Type())
+	}
+}
+
+func evalArrayIndexExpression(array, index object.Object) object.Object {
+	a := array.(*object.Array)
+	i := index.(*object.Integer).Value
+	max := int64(len(a.Elements) - 1)
+
+	if i < 0 || i > max {
+		return NULL
+	}
+
+	return a.Elements[i]
 }
 
 func newError(format string, a ...interface{}) *object.Error {

@@ -23,6 +23,7 @@ const (
 	ERROR_OBJ        = "ERROR"
 	FUNCTION_OBJ     = "FUNCTION"
 	BUILTIN_OBJ      = "BUILTIN"
+	ARRAY_OBJ        = "ARRAY"
 )
 
 // null
@@ -106,3 +107,24 @@ type BuiltIn struct {
 
 func (bi *BuiltIn) Type() ObjectType { return BUILTIN_OBJ }
 func (bi *BuiltIn) Inspect() string  { return "builtin function" }
+
+// array literal
+type Array struct {
+	Elements []Object
+}
+
+func (a *Array) Type() ObjectType { return ARRAY_OBJ }
+func (a *Array) Inspect() string {
+	var buffer bytes.Buffer
+
+	elements := []string{}
+	for _, e := range a.Elements {
+		elements = append(elements, e.Inspect())
+	}
+
+	buffer.WriteString("[")
+	buffer.WriteString(strings.Join(elements, ", "))
+	buffer.WriteString("]")
+
+	return buffer.String()
+}
