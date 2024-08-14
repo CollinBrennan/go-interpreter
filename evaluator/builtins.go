@@ -1,9 +1,13 @@
 package evaluator
 
-import "interpreter/object"
+import (
+	"fmt"
+	"interpreter/object"
+)
 
 var builtins = map[string]*object.BuiltIn{
-	"len": {Fn: builtInLen},
+	"len":  {Fn: builtInLen},
+	"puts": {Fn: puts},
 }
 
 func builtInLen(args ...object.Object) object.Object {
@@ -19,4 +23,12 @@ func builtInLen(args ...object.Object) object.Object {
 	default:
 		return newError("argument to `len` not supported, got %s", args[0].Type())
 	}
+}
+
+func puts(args ...object.Object) object.Object {
+	for _, arg := range args {
+		fmt.Println(arg.Inspect())
+	}
+
+	return NULL
 }
